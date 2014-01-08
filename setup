@@ -26,7 +26,7 @@ VBoxManage modifyvm ${NAME} \
 VBoxManage createhd --filename "${HDD}" --size 8192
 # Swap is recommended to be double the size of RAM. It is a fixed size as
 # it is performance sensitive.
-VBoxManage createhd --filename "${HDD_SWAP}" --size 1226
+VBoxManage createhd --filename "${HDD_SWAP}" --size 4096
 
 VBoxManage storagectl ${NAME} \
     --name SATA --add sata --portcount 2 --bootable on
@@ -46,7 +46,7 @@ VBoxManage startvm ${NAME} --type gui
 # discover your host's IP address and adjust accordingly.
 IP=`echo ${NATNET} | sed -nE 's/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}).*/\1/p'`
 
-echo 'At the boot prompt, hit <TAB> and then type:'
+echo 'At the boot prompt, hit <TAB> and then add:'
 echo " ks=http://${IP}.3:8081"
 sh ./httpd.sh | nc -l 8081 >/dev/null
 
