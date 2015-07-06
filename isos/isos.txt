@@ -1,0 +1,1 @@
+Download the Centos server install and VirtualBox guest additions isos and save them in this directory
