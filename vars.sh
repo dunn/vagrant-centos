@@ -5,4 +5,4 @@ GUESTADDITIONS="./isos/VBoxGuestAdditions_4.3.26.iso"
 KICKSTART="./kickstart.img"
 HDD="${HOME}/VirtualBox VMs/${NAME}/main.vdi"
 HDD_SWAP="${HOME}/VirtualBox VMs/${NAME}/swap.vdi"
-NATNET=10.0.2.0/24
+

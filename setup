@@ -56,26 +56,15 @@ VBoxManage storageattach ${NAME} \
 
 VBoxManage startvm ${NAME} --type gui
 
-# This only really caters for the common case. If you have problems, please
-# discover your host's IP address and adjust accordingly.
-IP=`echo ${NATNET} | sed -nE 's/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}).*/\1/p'`
-
-# Wait 5 seconds and then send the above line using keyboardputscancode
-sleep 1
+# Wait 1 seconds and then add the following kickstart config using keyboardputscancode
 # inst.ks=hd:fd0:/ks.cfg
+sleep 1
 VBoxManage controlvm ${NAME} keyboardputscancode 0f 8f
 VBoxManage controlvm ${NAME} keyboardputscancode 39 b9 17 97 31 b1 1f 9f 14 94 34 b4 25 a5 1f 9f 0d 8d
 VBoxManage controlvm ${NAME} keyboardputscancode 23 a3 20 a0 2a 27 a7 aa 21 a1 20 a0 0b 8b 2a 27 a7 aa 35 b5 25 a5 1f 9f 34 b4 2e ae 21 a1 22 a2 1c 9c
 
-#  0f 39 25 1f 0d 23 14 14 19 2a 27 35 35 02 0b 34 0b 34 03 34 04 2a 27 09 0b 09 02 1c
-# tab sp k  s  =  h  t  t  p  :     /  /  1  0  .  0  .  2  .  3  :     8  0  8  1  enter
-
 # tab sp i  n  s  t  .  k  s  =  h  d  :     f  d  0  :     /  k  s  .  c  f  g  enter
 #  0f 39 17 31 1f 14 34 25 1f 0d 23 20 2a 27 21 20 0b 2a 27 35 25 1f 34 2e 21 22 1c
-
-# echo 'At the boot prompt, hit <TAB> and then add:'
-# echo " ks=http://${IP}.3:8081"
-# sh ./httpd.sh | nc -l 8081 >/dev/null
 
 echo When finished:
 echo "./cleanup && vagrant package --base ${NAME} --output boxes/${NAME}-`date -j +%Y%m%d`.box"
