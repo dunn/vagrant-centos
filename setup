@@ -45,8 +45,11 @@ VBoxManage storageattach ${NAME} \
     --storagectl SATA --port 1 --type hdd --medium "${HDD_SWAP}"
 VBoxManage storageattach ${NAME} \
     --storagectl SATA --port 2 --type dvddrive --medium "${INSTALLER}"
+# The following line can be removed when this issue resolved: https://www.virtualbox.org/ticket/13040
 VBoxManage storageattach ${NAME} \
-    --storagectl SATA --port 3 --type dvddrive --medium "${GUESTADDITIONS}"
+    --storagectl SATA --port 3 --type dvddrive --medium emptydrive
+VBoxManage storageattach ${NAME} \
+    --storagectl SATA --port 3 --type dvddrive --medium additions
 
 # Attach a floppy image with the Centos kickstart file
 VBoxManage storagectl ${NAME} \
