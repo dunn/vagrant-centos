@@ -21,8 +21,11 @@ VBoxManage storageattach ${NAME} \
 VBoxManage storageattach ${NAME} \
     --storagectl SATA --port 1 --type hdd \
     --medium "${HDD_SWAP}"
+VBoxManage storageattach ${NAME} \
+    --storagectl SATA --port 2 --type hdd \
+    --medium "${HDD_OPT}"
 
 VBoxManage storageattach ${NAME} \
-    --storagectl SATA --port 2 --type dvddrive --medium emptydrive
-VBoxManage storageattach ${NAME} \
     --storagectl SATA --port 3 --type dvddrive --medium emptydrive
+VBoxManage storageattach ${NAME} \
+    --storagectl SATA --port 4 --type dvddrive --medium emptydrive
