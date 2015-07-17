@@ -8,7 +8,7 @@ Install:
 
 Download:
    download and copy the appropriate CentOS minimal iso to the /isos directory.  
-   It should match the iso name listed in vars.sh
+   This should be the iso name listed in vars.sh: CentOS-7-x86_64-Minimal-1503-01.iso
 
 Run:
 
@@ -58,7 +58,7 @@ configuration to best suit your needs. In particular, take note
 of the location of the ISOs (which aren't include in the git
 repository) e.g.:
 
-  INSTALLER="./isos/CentOS-6.5-x86_64-minimal.iso"
+  INSTALLER="./isos/CentOS-7-x86_64-Minimal-1503-01.iso"
 
 Assumptions have been made about the location of the hard drive as
 well:
