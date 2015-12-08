@@ -74,4 +74,4 @@ VBoxManage controlvm ${NAME} keyboardputscancode 23 a3 20 a0 2a 27 a7 aa 21 a1 2
 #  0f 39 17 31 1f 14 34 25 1f 0d 23 20 2a 27 21 20 0b 2a 27 35 25 1f 34 2e 21 22 1c
 
 echo When finished:
-echo "./cleanup && vagrant package --base ${NAME} --output boxes/${NAME}-`date -j +%Y%m%d`.box"
+echo "./cleanup && vagrant package --base ${NAME} --output boxes/${NAME}.box"
