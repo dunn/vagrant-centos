@@ -32,12 +32,12 @@ VBoxManage modifyvm ${NAME} \
     --biosbootmenu disabled
 
 # Main system disk image
-VBoxManage createhd --filename "${HDD}" --size 8192
+VBoxManage createhd --filename "${HDD}" --size 16384
 # Swap is recommended to be double the size of RAM. It is a fixed size as
 # it is performance sensitive.
 VBoxManage createhd --filename "${HDD_SWAP}" --size 4096
 # disk image for /opt
-VBoxManage createhd --filename "${HDD_OPT}" --size 8192
+VBoxManage createhd --filename "${HDD_OPT}" --size 16384
 
 
 VBoxManage storagectl ${NAME} \
