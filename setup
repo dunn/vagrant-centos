@@ -3,7 +3,7 @@
 iso = ARGV[0]
 cfg = ARGV[1]
 
-fail "Usage: ./build <image.iso> <ks.cfg>" unless iso && cfg
+fail "Usage: ./setup <image.iso> <ks.cfg>" unless iso && cfg
 
 require "pathname"
 require "fileutils"
@@ -141,6 +141,10 @@ storage_attachments[4] = { port: "4",
 storage_attachments.each do |a|
   run_cmd "VBoxManage", "storageattach", name, "--storagectl", "SATA",
           "--port", a[:port], "--type", a[:type], "--medium", a[:medium]
+end
+
+if Pathname.new("boxes/#{name}.box").exist?
+  FileUtils.mv "boxes/#{name}.box", "boxes/#{name}-#{Time.now.to_i}.box"
 end
 
 run_cmd "vagrant", "package", "--base", name, "--output", "boxes/#{name}.box"
