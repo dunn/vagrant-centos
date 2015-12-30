@@ -1,0 +1,146 @@
+#!/usr/bin/env ruby
+
+iso = ARGV[0]
+cfg = ARGV[1]
+
+fail "Usage: ./build <image.iso> <ks.cfg>" unless iso && cfg
+
+require "pathname"
+require "fileutils"
+
+def run_cmd(cmd, *args)
+  puts "\033[1;39m==> #{cmd} #{args.join(" ")}\033[0m"
+  pid = fork do
+    exec cmd, *args
+  end
+  Process.wait pid
+  unless $?.success?
+    fail "Error: #{cmd} failed with code #{$?.exitstatus}"
+  end
+end
+
+name = ENV["NAME"] || "centos70-x86_64"
+type = ENV["TYPE"] || "RedHat_64"
+hdd = ENV["HDD"] || "#{ENV["HOME"]}/VirtualBox VMs/#{name}/main.vdi"
+hdd_swap = ENV["HDD_SWAP"] || "#{ENV["HOME"]}/VirtualBox VMs/#{name}/swap.vdi"
+hdd_opt = ENV["HDD_OPT"] || "#{ENV["HOME"]}/VirtualBox VMs/#{name}/opt.vdi"
+
+kickstart = ENV["KICKSTART"] || "#{Pathname.pwd}/kickstart.img"
+
+# Remove mounted image from any previous attempt
+run_cmd "hdiutil", "detach", "/Volumes/HYDRA-KS/" if Pathname.new("/Volumes/HYDRA-KS").exist?
+
+# Create the kickstart image
+run_cmd "dd", "if=/dev/zero", "of=#{kickstart}", "bs=1024", "count=1440"
+
+# Get the mount point for the kickstart image
+disk = `hdiutil attach -nomount #{kickstart}`.strip
+
+# Mount the kickstart image
+run_cmd "diskutil", "eraseVolume", "MS-DOS", "HYDRA-KS", disk
+
+# Copy the kickstart configuration into the mounted image
+FileUtils.cp cfg, "/Volumes/HYDRA-KS/ks.cfg"
+
+# Delete any existing VM and create a new VM from scratch
+if `VBoxManage list vms`.include?(name)
+  run_cmd "VBoxManage", "unregistervm", name, "--delete"
+end
+
+# Register the new VM
+run_cmd "VBoxManage", "createvm", "--name", name, "--ostype", type, "--register"
+
+conf_args = %w(
+  --vram 12
+  --accelerate3d off
+  --memory 613
+  --usb off
+  --audio none
+  --boot1 disk --boot2 dvd --boot3 none --boot4 none
+  --nictype1 virtio --nic1 nat
+  --nictype2 virtio
+  --nictype3 virtio
+  --nictype4 virtio
+  --acpi on --ioapic off
+  --chipset piix3
+  --rtcuseutc on
+  --hpet on
+  --bioslogofadein off
+  --bioslogofadeout off
+  --bioslogodisplaytime 0
+  --biosbootmenu disabled
+)
+run_cmd "VBoxManage", "modifyvm", name, *conf_args
+
+# Main run_cmd disk image
+unless Pathname.new(hdd).exist?
+  run_cmd "VBoxManage", "createhd", "--filename", hdd, "--size", "8192"
+end
+
+# Swap is recommended to be double the size of RAM. It is a fixed size as
+# it is performance sensitive.
+unless Pathname.new(hdd_swap).exist?
+  run_cmd "VBoxManage", "createhd", "--filename", hdd_swap, "--size", "4096"
+end
+
+# disk image for /opt
+unless Pathname.new(hdd_opt).exist?
+  run_cmd "VBoxManage", "createhd", "--filename", hdd_opt, "--size", "8192"
+end
+
+run_cmd "VBoxManage", "storagectl", name, "--name", "SATA",
+        "--add", "sata", "--portcount", "2", "--bootable", "on"
+
+storage_attachments = [
+  { port: "0", type: "hdd", medium: hdd },
+  { port: "1", type: "hdd", medium: hdd_swap },
+  { port: "2", type: "dvddrive", medium: iso },
+
+  # https://www.virtualbox.org/ticket/13040
+  { port: "3", type: "dvddrive", medium: "emptydrive" },
+  { port: "3", type: "dvddrive", medium: "additions" },
+]
+
+storage_attachments.each do |a|
+  run_cmd "VBoxManage", "storageattach", name, "--storagectl", "SATA",
+          "--port", a[:port], "--type", a[:type], "--medium", a[:medium]
+end
+
+# Attach a floppy image with the CentOS kickstart file
+run_cmd "VBoxManage", "storagectl", name, "--name", "FDC",
+        "--add", "floppy", "--portcount", "1", "--bootable", "on"
+run_cmd "VBoxManage", "storageattach", name, "--storagectl", "FDC",
+        "--port", "0", "--device", "0", "--type", "fdd", "--medium", kickstart
+
+pid = fork do
+  # http://www.virtualbox.org/manual/ch07.html#vboxheadless
+  exec "VBoxHeadless", "--startvm", name
+end
+
+sleep 5
+run_cmd "VBoxManage", "controlvm", name, "keyboardputscancode", "0f", "8f"
+run_cmd "VBoxManage", "controlvm", name, "keyboardputscancode", *%w(39 b9 17 97 31 b1 1f 9f 14 94 34 b4 25 a5 1f 9f 0d 8d)
+run_cmd "VBoxManage", "controlvm", name, "keyboardputscancode", *%w(23 a3 20 a0 2a 27 a7 aa 21 a1 20 a0 0b 8b 2a 27 a7 aa 35 b5 25 a5 1f 9f 34 b4 2e ae 21 a1 22 a2 1c 9c)
+
+Process.wait pid
+
+run_cmd "VBoxManage", "modifyvm", name, "--boot1", "disk",
+        "--boot2", "none", "--boot3", "none", "--boot4", "none"
+
+%w(SATA FDC).each do |s|
+  run_cmd "VBoxManage", "storagectl", name, "--name", s, "--remove"
+end
+
+run_cmd "VBoxManage", "storagectl", name, "--name", "SATA",
+        "--add", "sata", "--portcount", "1", "--bootable", "on"
+
+storage_attachments[4] = { port: "4",
+                           type: "dvddrive",
+                           medium: "emptydrive" }
+
+storage_attachments.each do |a|
+  run_cmd "VBoxManage", "storageattach", name, "--storagectl", "SATA",
+          "--port", a[:port], "--type", a[:type], "--medium", a[:medium]
+end
+
+run_cmd "vagrant", "package", "--base", name, "--output", "boxes/#{name}.box"
