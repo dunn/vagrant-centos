@@ -148,4 +148,3 @@ if Pathname.new("boxes/#{name}.box").exist?
 end
 
 run_cmd "vagrant", "package", "--base", name, "--output", "boxes/#{name}.box"
-run_cmd "vagrant", "box", "add", "boxes/#{name}.box", "--name", "centos7"
