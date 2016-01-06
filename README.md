@@ -1,21 +1,27 @@
 vagrant-centos
 ==============
 
-Install:
+Install
+-------
 
-  This script depends on VirtualBox and Vagrant. Make sure both are
-  installed; on Mac OSX this can be done with Cask:
+This script depends on VirtualBox and Vagrant. Make sure both are
+installed; on Mac OSX this can be done with Cask:
 
-  - brew tap Caskroom/cask
-  - brew cask install virtualbox
-  - brew cask install vagrant
+- brew tap Caskroom/cask
+- brew cask install virtualbox
+- brew cask install vagrant
 
-Download:
-   Download a minimal CentOS 7 disk image from https://wiki.centos.org/Download
+Download
+--------
 
-Run:
+Download a minimal CentOS 7 disk image from https://wiki.centos.org/Download
 
-  ./setup /path/to/CentOS.iso ./ks.cfg
+Run
+---
+
+```
+./setup /path/to/CentOS.iso ./ks.cfg
+```
 
 This will launch a new VirtualBox VM, mount the CentOS install iso and run an
 automated installation to build a box ready for packaging as a CentOS server.
@@ -23,8 +29,8 @@ automated installation to build a box ready for packaging as a CentOS server.
 `VBoxHeadless` will run for at least 10 minutes with no output.  When
 it finishes, Vagrant will package a .box to the boxes subdirectory.
 
-Congratulations! You have just created a new Vagrant CentOS server box.
-
+Congratulations! You have just created a new Vagrant CentOS server
+box.  Add it to the Vagrant box list with `vagrant box add boxes/centos70-x86_64.box --name centos7`
 
 Specification
 -------------
@@ -62,6 +68,6 @@ suit your needs; see ./setup for the configuration options.
 If you wished to be emailed with the various logs the build produces
 see the `ks.cfg` file and find the line:
 
-  EMAIL=root
+    EMAIL=root
 
 and adjust accordingly.
