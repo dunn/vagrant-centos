@@ -72,7 +72,7 @@ conf_args = %w(
 )
 run_cmd "VBoxManage", "modifyvm", name, *conf_args
 
-# Main run_cmd disk image
+# Main system disk image
 unless Pathname.new(hdd).exist?
   run_cmd "VBoxManage", "createhd", "--filename", hdd, "--size", "8192"
 end
