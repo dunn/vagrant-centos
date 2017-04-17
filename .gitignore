@@ -1,3 +1,4 @@
-/isos/
-/boxes/
 kickstart.img
+/isos/
+/boxes/*
+!/boxes/.keep

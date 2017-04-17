@@ -1,1 +1,0 @@
-Vagrant .box files get saved in this directory
